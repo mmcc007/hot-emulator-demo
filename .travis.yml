@@ -1,0 +1,14 @@
+#language: ruby
+
+services:
+  - docker
+
+before_install:
+# install flutter dependencies
+- ./script/install.sh
+# install and start emulator
+- ./script/emulator.sh
+
+script:
+- cd flutter_app
+- flutter driver

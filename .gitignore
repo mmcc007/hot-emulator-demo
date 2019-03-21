@@ -1,0 +1,7 @@
+.idea/
+sdk/
+android_sdk/
+flutter/
+authorized_keys
+my.key
+my.key.pub
