@@ -29,7 +29,7 @@ install_android_tools(){
     android_tools_id=4333796 # android-28
 
     # download android SDK tools
-    if [ isMacOS ]; then
+    if isMacOS ; then
         sdk_filename=https://dl.google.com/android/repository/sdk-tools-darwin-$android_tools_id.zip
     else
         sdk_filename=https://dl.google.com/android/repository/sdk-tools-linux-$android_tools_id.zip
@@ -43,7 +43,7 @@ install_android_tools(){
     mkdir -p ~/.android
     touch ~/.android/repositories.cfg
     # install correct version of java on osx
-    if [[ isMacOS ]]; then
+    if isMacOS ; then
         if [[ $(java -version 2>&1) != *"java version \"1.8."* ]]; then
             echo Install java ??
             # skip brew update
@@ -64,7 +64,7 @@ install_flutter(){
   sdkmanager --list | head -15
   FLUTTER_CHANNEL=stable
   FLUTTER_VERSION=1.2.1-${FLUTTER_CHANNEL}
-  if [ isMacOS ]; then
+  if isMacOS ; then
     wget --quiet --output-document=flutter.zip https://storage.googleapis.com/flutter_infra/releases/${FLUTTER_CHANNEL}/macos/flutter_macos_v${FLUTTER_VERSION}.zip && unzip -qq flutter.zip > /dev/null && rm flutter.zip
   else
     sudo apt-get install -y --no-install-recommends lib32stdc++6 libstdc++6 > /dev/null
@@ -79,17 +79,29 @@ install_docker_image(){
 }
 
 isMacOS() {
+echo OSTYPE=$OSTYPE
+  #[[ $OSTYPE == "darwin"* ]]
+  #[ $OSTYPE =~ "darwin" ]
   [ $OSTYPE == "darwin"* ]
+  #if [ $OSTYPE =~ "darwin" ]
+  #if [[ $OSTYPE =~ "darwin" ]]
 }
+
+#if isMacOS; then
+  #echo is mac
+#else
+  #echo is not mac
+#fi
+#exit
 
 # if no command passed
 if [ -z $1 ]; then
-  . build-vars-ci.env
+  . ./build-vars-ci.env
   install_dependencies
 else
   case $1 in
     --local)
-        . build-vars-local.env
+        . ./build-vars-local.env
         install_dependencies
         ;;
     *)

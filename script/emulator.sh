@@ -10,13 +10,20 @@ Utility for starting emulator container in local or CI/CD environment.
 Commands:
     --stop
         stops and removes container.
-        (otherwise creates and starts container)
+    --avd
+        creates avd in container
+    --snapshot
+	creates quickstart snapshot in container
+    --archive
+	archives and downloads avd with quickstart snapshot from container
+
+    (otherwise creates and starts container)
 "
 }
 
 start_container(){
   # in case adb server is running
-  adb kill-server
+  #adb kill-server
   # spin up a container
   # with SSH
   docker run -d -p 5901:5901 -p 5037:5037 -p 2222:22 -v $(pwd)/sdk:/opt/android-sdk mmcc007/hot-emulator
@@ -53,6 +60,27 @@ start_emulator(){
   ssh -i ./my.key root@127.0.0.1 -p 2222 /root/script/start-hot-emulator.sh
 }
 
+create_avd(){
+  echo creating avd...
+  ssh -i ./my.key root@127.0.0.1 -p 2222 /root/script/create-hot-emulator.sh --avd
+}
+
+create_snapshot(){
+  echo creating snapshot...
+  ssh -i ./my.key root@127.0.0.1 -p 2222 /root/script/create-hot-emulator.sh --snapshot
+}
+
+create_archive(){
+  echo creating archive...
+  ssh -i ./my.key root@127.0.0.1 -p 2222 /root/script/create-hot-emulator.sh --archive
+  scp -i my.key -P 2222 root@127.0.0.1:~/.android/avd.tar.gz .
+  # for local docker image builds
+  cp avd.tar.gz ~/dev/github.com/mmcc007/hot-emulator
+  # for travis docker image builds
+  sudo cp avd.tar.gz /var/www/html
+  rm avd.tar.gz
+}
+
 # if no command passed
 if [ -z $1 ]; then
   stop_container
@@ -60,5 +88,22 @@ if [ -z $1 ]; then
   init_ssh
   start_emulator
 else
-  stop_container
+  case $1 in
+    --stop)
+  	stop_container
+        ;;
+    --avd)
+  	create_avd
+        ;;
+    --snapshot)
+  	create_snapshot
+        ;;
+    --archive)
+  	create_archive
+        ;;
+    *)
+        echo Unknown command: $1
+        show_help
+        ;;
+  esac
 fi
