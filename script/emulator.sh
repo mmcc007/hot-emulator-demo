@@ -8,16 +8,22 @@ show_help() {
 Utility for starting emulator container in local or CI/CD environment.
 
 Commands:
-    --stop
+    --start-container
+        creates and starts container
+    --stop-container
         stops and removes container.
+    --stop-all-containers
+        stops and removes all containers.
+    --start-emulator
+        starts emulator
+    --stop-emulator
+        stops emulator
     --avd
         creates avd in container
     --snapshot
 	creates quickstart snapshot in container
     --archive
 	archives and downloads avd with quickstart snapshot from container
-
-    (otherwise creates and starts container)
 "
 }
 
@@ -33,6 +39,15 @@ stop_container(){
   container_name="hot-emulator"
   # stop and remove container
   docker stop $(docker ps -a | grep ${container_name} | awk '{ print $1 }') &> /dev/null && docker rm $(docker ps -a | grep ${container_name} | awk '{ print $1 }') &> /dev/null
+}
+
+# stops and removes all containers
+stop_all_containers(){
+  container_ids=$(docker ps -a | grep --invert-match CONTAINER | awk '{ print $1 }')
+  if [ ! -z "$container_ids" ]; then
+    docker stop $container_ids
+    docker rm $container_ids
+  fi
 }
 
 init_ssh(){
@@ -57,7 +72,11 @@ init_ssh(){
 
 start_emulator(){
   # hot start emu
-  ssh -i ./my.key root@127.0.0.1 -p 2222 /root/script/start-hot-emulator.sh
+  ssh -i ./my.key root@127.0.0.1 -p 2222 /root/script/start-hot-emulator.sh &
+}
+
+stop_emulator(){
+  ssh -i ./my.key root@127.0.0.1 -p 2222 adb emu kill
 }
 
 create_avd(){
@@ -83,14 +102,28 @@ create_archive(){
 
 # if no command passed
 if [ -z $1 ]; then
-  stop_container
-  start_container
-  init_ssh
-  start_emulator
-else
-  case $1 in
-    --stop)
+  echo Error: no command specified
+  show_help
+  exit 1
+fi
+
+case $1 in
+    --start-container)
   	stop_container
+        start_container
+        init_ssh
+        ;;
+    --stop-container)
+  	stop_container
+        ;;
+    --stop-all-containers)
+  	stop_all_containers
+        ;;
+    --start-emulator)
+  	start_emulator
+        ;;
+    --stop-emulator)
+  	stop_emulator
         ;;
     --avd)
   	create_avd
@@ -101,9 +134,11 @@ else
     --archive)
   	create_archive
         ;;
+    --dev)
+        ssh -i ./my.key root@127.0.0.1 -p 2222 apt-get install -y vim
+        ;;
     *)
         echo Unknown command: $1
         show_help
         ;;
-  esac
-fi
+esac
