@@ -5,7 +5,7 @@ services:
 
 before_install:
 # install flutter dependencies
-- bash -x ./script/install.sh
+- bash -x ./script/install.sh --local
 # install and start emulator
 - bash -x ./script/emulator.sh 
 
