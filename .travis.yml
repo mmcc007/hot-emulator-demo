@@ -5,10 +5,9 @@ services:
 
 before_install:
 # install flutter dependencies
-- ./script/install.sh
+- bash -x ./script/install.sh
 # install and start emulator
-- ./script/emulator.sh
+- bash -x ./script/emulator.sh 
 
 script:
-- cd flutter_app
-- flutter driver
+- bash -x ./script/run-test.sh flutter_app
