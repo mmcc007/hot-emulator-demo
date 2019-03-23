@@ -41,7 +41,7 @@ start_container(){
   #docker run -d -p 5901:5901 -p 5037:5037 -p 2222:22 -v $(pwd)/sdk:/opt/android-sdk mmcc007/hot-emulator
   docker run -d -p 5901:5901 -p 5037:5037 -p 2222:22 -v $(pwd)/sdk:/opt/android-sdk ${docker_image_name}
   docker ps -a
-  sudo su -c 'sleep 1 && . ./build-vars-local.env && adb start-server'
+  sudo su -c 'sleep 10 && . ./build-vars-local.env && adb start-server'
   adb devices
 }
 
