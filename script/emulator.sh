@@ -39,8 +39,8 @@ start_container(){
   # spin up a container
   # with SSH
   #docker run -d -p 5901:5901 -p 5037:5037 -p 2222:22 -v $(pwd)/sdk:/opt/android-sdk mmcc007/hot-emulator
-  #docker run -d -p 5901:5901 -p 5037:5037 -p 2222:22 -v $(pwd)/sdk:/opt/android-sdk --volume ~/.ssh/known_hosts:/etc/ssh/ssh_known_hosts ${docker_image_name}
-  docker run -d -p 5901:5901 -p 5037:5037 -p 2222:22 -v $(pwd)/sdk:/opt/android-sdk ${docker_image_name}
+  docker run -d -p 5901:5901 -p 5037:5037 -p 2222:22 -v $(pwd)/sdk:/opt/android-sdk --volume ~/.ssh/known_hosts:/etc/ssh/ssh_known_hosts ${docker_image_name}
+  #docker run -d -p 5901:5901 -p 5037:5037 -p 2222:22 -v $(pwd)/sdk:/opt/android-sdk ${docker_image_name}
   docker ps -a
   sleep 2
   sudo su -c '. ./build-vars-local.env && adb start-server'
