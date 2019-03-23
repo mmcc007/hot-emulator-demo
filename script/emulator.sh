@@ -30,6 +30,7 @@ Commands:
 start_container(){
   # in case adb server is running
   #adb kill-server
+  sudo adb kill-server
   # spin up a container
   # with SSH
   #docker run -d -p 5901:5901 -p 5037:5037 -p 2222:22 -v $(pwd)/sdk:/opt/android-sdk mmcc007/hot-emulator
