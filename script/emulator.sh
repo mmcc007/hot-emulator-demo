@@ -39,6 +39,7 @@ start_container(){
   # spin up a container
   # with SSH
   #docker run -d -p 5901:5901 -p 5037:5037 -p 2222:22 -v $(pwd)/sdk:/opt/android-sdk mmcc007/hot-emulator
+  #docker run -d -p 5901:5901 -p 5037:5037 -p 2222:22 -v $(pwd)/sdk:/opt/android-sdk --volume ~/.ssh/known_hosts:/etc/ssh/ssh_known_hosts ${docker_image_name}
   docker run -d -p 5901:5901 -p 5037:5037 -p 2222:22 -v $(pwd)/sdk:/opt/android-sdk ${docker_image_name}
   docker ps -a
   sleep 2
@@ -69,6 +70,11 @@ init_ssh(){
   rm -f my.key
   ssh-keygen -t rsa -N "" -f my.key
   cp my.key.pub authorized_keys
+
+  # Add public key to known hosts for travis
+  # (to avoid ssh login prompt)
+  cat my.key.pub >> $HOME/.ssh/known_hosts
+  cat $HOME/.ssh/known_hosts
 
   # Run a container
   #docker run -d -p 2222:22 -v $(pwd)/sdk:/opt/android-sdk:ro thyrlian/android-sdk
