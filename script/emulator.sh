@@ -41,9 +41,9 @@ start_container(){
   #docker run -d -p 5901:5901 -p 5037:5037 -p 2222:22 -v $(pwd)/sdk:/opt/android-sdk mmcc007/hot-emulator
   docker run -d -p 5901:5901 -p 5037:5037 -p 2222:22 -v $(pwd)/sdk:/opt/android-sdk ${docker_image_name}
   docker ps -a
-  sleep 10
+  sleep 2
   sudo su -c '. ./build-vars-local.env && adb start-server'
-  sleep 10
+  sleep 2
   adb devices
 }
 
@@ -80,14 +80,41 @@ init_ssh(){
   # Set the proper owner and group for authorized_keys file
   docker exec -it `docker ps -aqf "ancestor=${docker_image_name}"` bash -c 'chown root:root /root/.ssh/authorized_keys'
   #docker exec -it `docker ps -aqf "ancestor=thyrlian/android-sdk"` bash -c 'chown root:root /root/
+
+  # test ssh is working
+  ssh -i ./my.key root@127.0.0.1 -p 2222 ls -la
 }
 
 start_emulator(){
   # hot start emu
-  ssh -i ./my.key root@127.0.0.1 -p 2222 /root/script/start-hot-emulator.sh &
+
+VAR1="boo"
+ssh -i ./my.key -T root@127.0.0.1 -p 2222 << 'EOSSH'
+# start emulator from an existing avd with a default snapshot
+set -x
+set -e
+emu_name='test'
+emu_options="-no-audio -no-window -no-boot-anim -gpu swiftshader"
+#nohup $ANDROID_HOME/emulator/emulator -avd $emu_name $emu_options &
+/opt/android-sdk/emulator/emulator -avd $emu_name $emu_options > foo.out 2> foo.err < /dev/null &
+#/opt/android-sdk/emulator/emulator -avd $emu_name $emu_options &
+#disown
+EOSSH
+
+# fail on any error
+#ssh -i ./my.key -T root@127.0.0.1 -p 2222 << EOSSH
+#set -e
+#emu_name='test'
+#emu_options="-no-audio -no-window -no-boot-anim -gpu swiftshader"
+#nohup $ANDROID_HOME/emulator/emulator -avd $emu_name $emu_options &
+#EOSSH
+
+
+
+#  ssh -i ./my.key root@127.0.0.1 -p 2222 /root/script/start-hot-emulator.sh &
   # check emulator is found and ready
   #ssh -i ./my.key root@127.0.0.1 -p 2222 flutter devices
-  adb devices
+  #adb devices
   ./script/android-wait-for-emulator.sh
 }
 
