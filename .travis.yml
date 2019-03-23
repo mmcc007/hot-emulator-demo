@@ -7,8 +7,9 @@ before_install:
 - sudo apt-get install -y --no-install-recommends lib32stdc++6 libstdc++6
 # install flutter dependencies
 - bash -x ./script/install.sh --local
-# install and start emulator
-- bash -x ./script/emulator.sh 
+# start emulator in container
+- bash -x ./script/emulator.sh --start-container
+- bash -x ./script/emulator.sh --start-emulator
 
 script:
 - bash -x ./script/run-test.sh flutter_app
