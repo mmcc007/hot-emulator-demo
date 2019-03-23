@@ -96,7 +96,7 @@ echo OSTYPE=$OSTYPE
 #exit
 
 . docker-vars.env
-image_name="$DOCKER_NAME:$DOCKER_TAG"
+image_name="$DOCKER_USERNAME/$DOCKER_IMAGE:$DOCKER_TAG"
 
 # if no command passed
 if [ -z $1 ]; then

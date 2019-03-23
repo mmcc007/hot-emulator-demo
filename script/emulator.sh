@@ -32,7 +32,8 @@ start_container(){
   #adb kill-server
   # spin up a container
   # with SSH
-  docker run -d -p 5901:5901 -p 5037:5037 -p 2222:22 -v $(pwd)/sdk:/opt/android-sdk mmcc007/hot-emulator
+  #docker run -d -p 5901:5901 -p 5037:5037 -p 2222:22 -v $(pwd)/sdk:/opt/android-sdk mmcc007/hot-emulator
+  docker run -d -p 5901:5901 -p 5037:5037 -p 2222:22 -v $(pwd)/sdk:/opt/android-sdk ${container_name}
   docker ps -a
 }
 
@@ -75,7 +76,8 @@ start_emulator(){
   # hot start emu
   ssh -i ./my.key root@127.0.0.1 -p 2222 /root/script/start-hot-emulator.sh &
   # check emulator is found and ready
-  ssh -i ./my.key root@127.0.0.1 -p 2222 flutter devices
+  #ssh -i ./my.key root@127.0.0.1 -p 2222 flutter devices
+  flutter devices
 }
 
 stop_emulator(){
@@ -111,7 +113,7 @@ if [ -z $1 ]; then
 fi
 
 . ./docker-vars.env
-container_name="$DOCKER_NAME:$DOCKER_TAG"
+container_name="$DOCKER_USERNAME/$DOCKER_IMAGE:$DOCKER_TAG"
 
 case $1 in
     --start-container)
