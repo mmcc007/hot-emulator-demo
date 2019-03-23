@@ -10,7 +10,7 @@ dist: trusty
 #  - docker
 
 before_install:
-- sudo apt-get install -y --no-install-recommends lib32stdc++6 libstdc++6
+- sudo apt-get install -y --no-install-recommends lib32stdc++6 libstdc++6 > /dev/null
 # install flutter dependencies
 - bash -x ./script/install.sh --local
 # start emulator in container
