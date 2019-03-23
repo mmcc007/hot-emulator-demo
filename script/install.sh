@@ -2,6 +2,9 @@
 
 # install flutter dependencies
 
+# fail on any error
+set -e
+
 show_help() {
   printf "usage: $0 [command]
 
@@ -52,7 +55,7 @@ install_android_tools(){
         fi
     fi
     # Accept licenses before installing components, no need to echo y for each component
-    yes | sdkmanager --licenses
+    yes | sdkmanager --licenses > /dev/null
     # install android tools
     sdkmanager "emulator" "tools" "platform-tools" > /dev/null
     sdkmanager --list | head -15

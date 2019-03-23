@@ -2,6 +2,9 @@
 
 # install and start emulator
 
+# fail on any error
+set -e
+
 show_help() {
   printf "usage: $0 [command]
 
@@ -36,14 +39,14 @@ start_container(){
   # spin up a container
   # with SSH
   #docker run -d -p 5901:5901 -p 5037:5037 -p 2222:22 -v $(pwd)/sdk:/opt/android-sdk mmcc007/hot-emulator
-  docker run -d -p 5901:5901 -p 5037:5037 -p 2222:22 -v $(pwd)/sdk:/opt/android-sdk ${container_name}
+  docker run -d -p 5901:5901 -p 5037:5037 -p 2222:22 -v $(pwd)/sdk:/opt/android-sdk ${docker_image_name}
   docker ps -a
 }
 
 stop_container(){
-  #container_name="hot-emulator"
+  #docker_image_name="hot-emulator"
   # stop and remove container
-  docker stop $(docker ps -a | grep ${container_name} | awk '{ print $1 }') &> /dev/null && docker rm $(docker ps -a | grep ${container_name} | awk '{ print $1 }') &> /dev/null
+  docker stop $(docker ps -a | grep ${docker_image_name} | awk '{ print $1 }') &> /dev/null && docker rm $(docker ps -a | grep ${docker_image_name} | awk '{ print $1 }') &> /dev/null
 }
 
 # stops and removes all containers
@@ -56,7 +59,7 @@ stop_all_containers(){
 }
 
 init_ssh(){
-  #container_name="mmcc007/hot-emulator:0.0.1"
+  #docker_image_name="mmcc007/hot-emulator:0.0.1"
 
   # Create a local `authorized_keys` file, which contains the content from your `id_rsa.pub`
   rm -f my.key
@@ -67,11 +70,11 @@ init_ssh(){
   #docker run -d -p 2222:22 -v $(pwd)/sdk:/opt/android-sdk:ro thyrlian/android-sdk
 
   # Copy the just created local authorized_keys file to the running container
-  docker cp $(pwd)/authorized_keys `docker ps -aqf "ancestor=${container_name}"`:/root/.ssh/authorized_keys
+  docker cp $(pwd)/authorized_keys `docker ps -aqf "ancestor=${docker_image_name}"`:/root/.ssh/authorized_keys
   #docker cp $(pwd)/authorized_keys `docker ps -aqf "ancestor=thyrlian/android-sdk"`:/root/.ssh/authorized_keys
 
   # Set the proper owner and group for authorized_keys file
-  docker exec -it `docker ps -aqf "ancestor=${container_name}"` bash -c 'chown root:root /root/.ssh/authorized_keys'
+  docker exec -it `docker ps -aqf "ancestor=${docker_image_name}"` bash -c 'chown root:root /root/.ssh/authorized_keys'
   #docker exec -it `docker ps -aqf "ancestor=thyrlian/android-sdk"` bash -c 'chown root:root /root/
 }
 
@@ -122,7 +125,7 @@ fi
 # set build env vars
 . ./build-vars-local.env
 
-container_name="$DOCKER_USERNAME/$DOCKER_IMAGE:$DOCKER_TAG"
+docker_image_name="$DOCKER_USERNAME/$DOCKER_IMAGE:$DOCKER_TAG"
 
 case $1 in
     --start-container)

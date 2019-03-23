@@ -2,6 +2,9 @@
 
 # run flutter test using hot emulator in container
 
+# fail on any error
+set -e
+
 show_help() {
   printf "usage: $0 <app-name>
 
