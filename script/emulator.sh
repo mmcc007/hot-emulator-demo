@@ -33,6 +33,7 @@ start_container(){
   # spin up a container
   # with SSH
   docker run -d -p 5901:5901 -p 5037:5037 -p 2222:22 -v $(pwd)/sdk:/opt/android-sdk mmcc007/hot-emulator
+  docker ps -a
 }
 
 stop_container(){
@@ -51,7 +52,7 @@ stop_all_containers(){
 }
 
 init_ssh(){
-  container_name="mmcc007/hot-emulator"
+  container_name="mmcc007/hot-emulator:0.0.1"
 
   # Create a local `authorized_keys` file, which contains the content from your `id_rsa.pub`
   rm -f my.key
@@ -73,6 +74,8 @@ init_ssh(){
 start_emulator(){
   # hot start emu
   ssh -i ./my.key root@127.0.0.1 -p 2222 /root/script/start-hot-emulator.sh &
+  # check emulator is found and ready
+  ssh -i ./my.key root@127.0.0.1 -p 2222 flutter devices
 }
 
 stop_emulator(){
