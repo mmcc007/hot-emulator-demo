@@ -76,6 +76,7 @@ install_flutter(){
 install_docker_image(){
   image_name="mmcc007/hot-emulator:0.0.1"
   docker pull $image_name
+  docker images
 }
 
 isMacOS() {
@@ -93,6 +94,9 @@ echo OSTYPE=$OSTYPE
   #echo is not mac
 #fi
 #exit
+
+. docker-vars.env
+image_name="$DOCKER_NAME:$DOCKER_TAG"
 
 # if no command passed
 if [ -z $1 ]; then

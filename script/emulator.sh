@@ -37,7 +37,7 @@ start_container(){
 }
 
 stop_container(){
-  container_name="hot-emulator"
+  #container_name="hot-emulator"
   # stop and remove container
   docker stop $(docker ps -a | grep ${container_name} | awk '{ print $1 }') &> /dev/null && docker rm $(docker ps -a | grep ${container_name} | awk '{ print $1 }') &> /dev/null
 }
@@ -52,7 +52,7 @@ stop_all_containers(){
 }
 
 init_ssh(){
-  container_name="mmcc007/hot-emulator:0.0.1"
+  #container_name="mmcc007/hot-emulator:0.0.1"
 
   # Create a local `authorized_keys` file, which contains the content from your `id_rsa.pub`
   rm -f my.key
@@ -109,6 +109,9 @@ if [ -z $1 ]; then
   show_help
   exit 1
 fi
+
+. ./docker-vars.env
+container_name="$DOCKER_NAME:$DOCKER_TAG"
 
 case $1 in
     --start-container)
