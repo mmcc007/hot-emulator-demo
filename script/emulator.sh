@@ -71,9 +71,9 @@ init_ssh(){
   ssh-keygen -t rsa -N "" -f my.key
   cp my.key.pub authorized_keys
 
-  # Add public key to known hosts for travis
+  # Add public key of ssh server running in container to known hosts for travis
   # (to avoid ssh login prompt)
-  cat my.key.pub >> $HOME/.ssh/known_hosts
+  ssh-keyscan -t rsa 127.0.0.1 >> $HOME/.ssh/known_hosts
   cat $HOME/.ssh/known_hosts
 
   # Run a container
