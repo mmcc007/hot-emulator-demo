@@ -75,6 +75,7 @@ init_ssh(){
 
   # To avoid ssh login prompt
   echo 'StrictHostKeyChecking=no' >> ~/.ssh/config
+  cat ~/.ssh/config
 
   # Run a container
   #docker run -d -p 2222:22 -v $(pwd)/sdk:/opt/android-sdk:ro thyrlian/android-sdk
@@ -88,8 +89,8 @@ init_ssh(){
   #docker exec -it `docker ps -aqf "ancestor=thyrlian/android-sdk"` bash -c 'chown root:root /root/
 
   # test ssh is working
-  #sleep 1 # allow time for ssh server to respond ??
-  #ssh -i ./my.key root@127.0.0.1 -p 2222 ls -la
+  sleep 1 # allow time for ssh server to respond ??
+  ssh -i ./my.key root@127.0.0.1 -p 2222 ls -la
 }
 
 # install emulator system image
@@ -121,7 +122,7 @@ emu_options="-no-audio -no-window -no-boot-anim -gpu swiftshader"
 #/opt/android-sdk/emulator/emulator -avd $emu_name $emu_options &
 #disown
 
-sync # write any files buffered in RAM to disk
+#sync # write any files buffered in RAM to disk
 sleep 1
 ps ax | grep emu
 
