@@ -24,7 +24,8 @@ install_dependencies(){
 #  echo PATH=$PATH
 
   install_android_tools
-#  install_flutter
+  install_emulator_image
+  install_flutter
   install_docker_image
 }
 
@@ -62,6 +63,13 @@ install_android_tools(){
     sdkmanager --list | head -15
 }
 
+# install emulator system image
+install_emulator_image(){
+  sdkmanager "platform-tools" "platforms;android-$emulator_api" "emulator"
+  sdkmanager "system-images;android-$emulator_api;$android_abi" > /dev/null
+  sdkmanager --list | head -15
+}
+
 install_flutter(){
   # install pre-compiled flutter
   sdkmanager "platforms;android-28" "build-tools;28.0.3" > /dev/null # required by flutter
@@ -78,7 +86,6 @@ install_flutter(){
 }
 
 install_docker_image(){
-  image_name="mmcc007/hot-emulator:0.0.1"
   docker pull $image_name
   docker images
 }
@@ -104,7 +111,8 @@ image_name="$DOCKER_USERNAME/$DOCKER_IMAGE:$DOCKER_TAG"
 
 # if no command passed
 if [ -z $1 ]; then
-  . ./build-vars-ci.env
+  #. ./build-vars-ci.env
+  . ./build-vars-local.env
   install_dependencies
 else
   case $1 in

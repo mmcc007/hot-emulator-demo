@@ -17,6 +17,8 @@ Commands:
         stops and removes container.
     --stop-all-containers
         stops and removes all containers.
+    --install-emulator-image
+        installs emulator image
     --start-emulator
         starts emulator
     --stop-emulator
@@ -35,17 +37,17 @@ start_container(){
   #adb kill-server
   #ps aux |grep adb
   #sudo killall -v -QUIT adb
-  sudo su -c '. ./build-vars-local.env && adb kill-server'
+  #sudo su -c '. ./build-vars-local.env && adb kill-server'
   # spin up a container
   # with SSH
   #docker run -d -p 5901:5901 -p 5037:5037 -p 2222:22 -v $(pwd)/sdk:/opt/android-sdk mmcc007/hot-emulator
   docker run -d -p 5901:5901 -p 5037:5037 -p 2222:22 -v $(pwd)/sdk:/opt/android-sdk --volume ~/.ssh/known_hosts:/etc/ssh/ssh_known_hosts ${docker_image_name}
   #docker run -d -p 5901:5901 -p 5037:5037 -p 2222:22 -v $(pwd)/sdk:/opt/android-sdk ${docker_image_name}
   docker ps -a
-  sleep 2
-  sudo su -c '. ./build-vars-local.env && adb start-server'
-  sleep 2
-  adb devices
+  #sleep 2
+  #sudo su -c '. ./build-vars-local.env && adb start-server'
+  #sleep 2
+  #adb devices
 }
 
 stop_container(){
@@ -86,7 +88,15 @@ init_ssh(){
   #docker exec -it `docker ps -aqf "ancestor=thyrlian/android-sdk"` bash -c 'chown root:root /root/
 
   # test ssh is working
-  ssh -i ./my.key root@127.0.0.1 -p 2222 ls -la
+  #sleep 1 # allow time for ssh server to respond ??
+  #ssh -i ./my.key root@127.0.0.1 -p 2222 ls -la
+}
+
+# install emulator system image
+# (install via container)
+install_emulator_image(){
+  ssh -i ./my.key -T root@127.0.0.1 -p 2222 sdkmanager "system-images;android-$emulator_api;$android_abi" > /dev/null
+  ssh -i ./my.key -T root@127.0.0.1 -p 2222 sdkmanager --list | head -15
 }
 
 start_emulator(){
@@ -97,6 +107,10 @@ start_emulator(){
 # start emulator from an existing avd with a default snapshot
 set -x
 #set -e
+
+# fix install of emulator (which was installed from host)
+sdkmanager --update
+
 emu_name='test'
 emu_options="-no-audio -no-window -no-boot-anim -gpu swiftshader"
 #nohup $ANDROID_HOME/emulator/emulator -avd $emu_name $emu_options &
@@ -105,6 +119,7 @@ emu_options="-no-audio -no-window -no-boot-anim -gpu swiftshader"
 #/opt/android-sdk/emulator/emulator -avd $emu_name $emu_options &
 #disown
 
+sync # write any files buffered in RAM to disk
 sleep 1
 ps ax | grep emu
 
@@ -183,6 +198,9 @@ case $1 in
         ;;
     --stop-all-containers)
   	stop_all_containers
+        ;;
+    --install-emulator-image)
+  	install_emulator_image
         ;;
     --start-emulator)
   	start_emulator
