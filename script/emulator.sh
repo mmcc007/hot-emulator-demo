@@ -96,7 +96,7 @@ start_emulator(){
   ssh -i ./my.key -T root@127.0.0.1 -p 2222 << 'EOSSH'
 # start emulator from an existing avd with a default snapshot
 set -x
-set -e
+#set -e
 emu_name='test'
 emu_options="-no-audio -no-window -no-boot-anim -gpu swiftshader"
 #nohup $ANDROID_HOME/emulator/emulator -avd $emu_name $emu_options &
