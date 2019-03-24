@@ -111,6 +111,17 @@ ps ax | grep emu
 cat foo.out
 cat foo.err
 
+ls -la ~/.android/avd/test.avd/
+ls -la /opt/android-sdk/system-images/android-22/default/armeabi-v7a/
+
+ANDROID_SDK_ROOT=/opt/android-sdk
+/opt/android-sdk/emulator/emulator -avd $emu_name $emu_options > foo.out 2> foo.err < /dev/null &
+sleep 1
+ps ax | grep emu
+
+cat foo.out
+cat foo.err
+
 EOSSH
 
 #  ssh -i ./my.key root@127.0.0.1 -p 2222 /root/script/start-hot-emulator.sh &
