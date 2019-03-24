@@ -25,8 +25,8 @@ install_dependencies(){
 
   install_android_tools
   install_emulator_image
-  install_flutter
   install_docker_image
+  install_flutter
 }
 
 # installs the android sdk tools in specified directory
