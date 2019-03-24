@@ -82,7 +82,7 @@ install_flutter(){
     #sudo apt-get install -y --no-install-recommends lib32stdc++6 libstdc++6 > /dev/null
     wget --quiet --output-document=flutter.tar.xz https://storage.googleapis.com/flutter_infra/releases/${FLUTTER_CHANNEL}/linux/flutter_linux_v${FLUTTER_VERSION}.tar.xz && tar xf flutter.tar.xz > /dev/null && rm flutter.tar.xz
   fi
-  flutter doctor -v
+  #flutter doctor -v
 }
 
 install_docker_image(){

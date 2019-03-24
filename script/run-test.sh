@@ -35,7 +35,7 @@ wait_emu(){
 # run the test in the container
 run(){
   app_name=$1
-  ssh -i ./my.key root@127.0.0.1 -p 2222 "set +e; PATH=$docker_sdk_dir/flutter/bin:$PATH; cd $docker_sdk_dir/$app_name; flutter driver"
+  ssh -i ./my.key root@127.0.0.1 -p 2222 "set +e; PATH=$docker_sdk_dir/flutter/bin:$PATH; cd $docker_sdk_dir/$app_name; flutter doctor -v; flutter driver"
 }
 
 # if no command passed
