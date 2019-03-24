@@ -23,7 +23,7 @@ install_dependencies(){
 #  echo flutter_home=$flutter_home
 #  echo PATH=$PATH
 
-#  install_android_tools
+  install_android_tools
 #  install_flutter
   install_docker_image
 }
