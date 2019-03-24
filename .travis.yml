@@ -1,14 +1,21 @@
+# sudo: false --> run dist image in docker container on shared host for faster startup (runs slower)
+# sudo: required --> run dist image in VM on Google Compute Engine for slower startup (runs faster)
+# sudo and dist are ignored on osx
+sudo: required
+dist: trusty
+
 #language: ruby
 
-services:
-  - docker
+#services:
+#  - docker
 
 before_install:
+- sudo apt-get install -y --no-install-recommends lib32stdc++6 libstdc++6 > /dev/null
 # install flutter dependencies
-- ./script/install.sh
-# install and start emulator
-- ./script/emulator.sh
+- bash -x ./script/install.sh --local
+# start emulator in container
+- bash -x ./script/emulator.sh --start-container
+- bash -x ./script/emulator.sh --start-emulator
 
 script:
-- cd flutter_app
-- flutter driver
+- bash -x ./script/run-test.sh flutter_app

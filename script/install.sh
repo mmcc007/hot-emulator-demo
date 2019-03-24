@@ -2,6 +2,9 @@
 
 # install flutter dependencies
 
+# fail on any error
+set -e
+
 show_help() {
   printf "usage: $0 [command]
 
@@ -19,9 +22,11 @@ install_dependencies(){
 #  echo android_home=$android_home
 #  echo flutter_home=$flutter_home
 #  echo PATH=$PATH
+
   install_android_tools
-  install_flutter
+  install_emulator_image
   install_docker_image
+  install_flutter
 }
 
 # installs the android sdk tools in specified directory
@@ -52,10 +57,17 @@ install_android_tools(){
         fi
     fi
     # Accept licenses before installing components, no need to echo y for each component
-    yes | sdkmanager --licenses
+    yes | sdkmanager --licenses > /dev/null
     # install android tools
     sdkmanager "emulator" "tools" "platform-tools" > /dev/null
     sdkmanager --list | head -15
+}
+
+# install emulator system image
+install_emulator_image(){
+  sdkmanager "platform-tools" "platforms;android-$emulator_api" "emulator"
+  sdkmanager "system-images;android-$emulator_api;$android_abi" > /dev/null
+  sdkmanager --list | head -15
 }
 
 install_flutter(){
@@ -67,15 +79,15 @@ install_flutter(){
   if isMacOS ; then
     wget --quiet --output-document=flutter.zip https://storage.googleapis.com/flutter_infra/releases/${FLUTTER_CHANNEL}/macos/flutter_macos_v${FLUTTER_VERSION}.zip && unzip -qq flutter.zip > /dev/null && rm flutter.zip
   else
-    sudo apt-get install -y --no-install-recommends lib32stdc++6 libstdc++6 > /dev/null
+    #sudo apt-get install -y --no-install-recommends lib32stdc++6 libstdc++6 > /dev/null
     wget --quiet --output-document=flutter.tar.xz https://storage.googleapis.com/flutter_infra/releases/${FLUTTER_CHANNEL}/linux/flutter_linux_v${FLUTTER_VERSION}.tar.xz && tar xf flutter.tar.xz > /dev/null && rm flutter.tar.xz
   fi
-  flutter doctor -v
+  #flutter doctor -v
 }
 
 install_docker_image(){
-  image_name="mmcc007/hot-emulator:0.0.1"
   docker pull $image_name
+  docker images
 }
 
 isMacOS() {
@@ -94,9 +106,13 @@ echo OSTYPE=$OSTYPE
 #fi
 #exit
 
+. docker-vars.env
+image_name="$DOCKER_USERNAME/$DOCKER_IMAGE:$DOCKER_TAG"
+
 # if no command passed
 if [ -z $1 ]; then
-  . ./build-vars-ci.env
+  #. ./build-vars-ci.env
+  . ./build-vars-local.env
   install_dependencies
 else
   case $1 in
