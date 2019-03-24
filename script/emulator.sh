@@ -91,34 +91,26 @@ init_ssh(){
 
 start_emulator(){
   # hot start emu
+  adb devices
 
-VAR1="boo"
-ssh -i ./my.key -T root@127.0.0.1 -p 2222 << 'EOSSH'
+  ssh -i ./my.key -T root@127.0.0.1 -p 2222 << 'EOSSH'
 # start emulator from an existing avd with a default snapshot
 set -x
 set -e
 emu_name='test'
 emu_options="-no-audio -no-window -no-boot-anim -gpu swiftshader"
 #nohup $ANDROID_HOME/emulator/emulator -avd $emu_name $emu_options &
+# redirect stdin, stdout and stderr to avoid hanging on exit of ssh
 /opt/android-sdk/emulator/emulator -avd $emu_name $emu_options > foo.out 2> foo.err < /dev/null &
 #/opt/android-sdk/emulator/emulator -avd $emu_name $emu_options &
 #disown
 EOSSH
 
-# fail on any error
-#ssh -i ./my.key -T root@127.0.0.1 -p 2222 << EOSSH
-#set -e
-#emu_name='test'
-#emu_options="-no-audio -no-window -no-boot-anim -gpu swiftshader"
-#nohup $ANDROID_HOME/emulator/emulator -avd $emu_name $emu_options &
-#EOSSH
-
-
-
 #  ssh -i ./my.key root@127.0.0.1 -p 2222 /root/script/start-hot-emulator.sh &
   # check emulator is found and ready
-  #ssh -i ./my.key root@127.0.0.1 -p 2222 flutter devices
-  #adb devices
+  ssh -i ./my.key root@127.0.0.1 -p 2222 sleep 2 && adb devices
+  sleep 2
+  adb devices
   ./script/android-wait-for-emulator.sh
 }
 
