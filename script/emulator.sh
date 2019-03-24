@@ -99,9 +99,11 @@ install_emulator_image(){
   ssh -i ./my.key -T root@127.0.0.1 -p 2222 sdkmanager --list | head -15
 }
 
+# Starts hot emu
 start_emulator(){
-  # hot start emu
-  adb devices
+
+  #sudo su -c '. ./build-vars-local.env && adb kill-server'
+  #adb devices
 
   ssh -i ./my.key -T root@127.0.0.1 -p 2222 << 'EOSSH'
 # start emulator from an existing avd with a default snapshot
@@ -137,14 +139,16 @@ ps ax | grep emu
 cat foo.out
 cat foo.err
 
+#./script/android-wait-for-emulator.sh
+
 EOSSH
 
 #  ssh -i ./my.key root@127.0.0.1 -p 2222 /root/script/start-hot-emulator.sh &
   # check emulator is found and ready
-  ssh -i ./my.key root@127.0.0.1 -p 2222 sleep 2 && adb devices
-  sleep 2
-  adb devices
-  ./script/android-wait-for-emulator.sh
+  #ssh -i ./my.key root@127.0.0.1 -p 2222 sleep 2 && adb devices
+  #sleep 2
+  #adb devices
+  #./script/android-wait-for-emulator.sh
 }
 
 stop_emulator(){
