@@ -104,6 +104,13 @@ emu_options="-no-audio -no-window -no-boot-anim -gpu swiftshader"
 /opt/android-sdk/emulator/emulator -avd $emu_name $emu_options > foo.out 2> foo.err < /dev/null &
 #/opt/android-sdk/emulator/emulator -avd $emu_name $emu_options &
 #disown
+
+sleep 1
+ps ax | grep emu
+
+cat foo.out
+cat foo.err
+
 EOSSH
 
 #  ssh -i ./my.key root@127.0.0.1 -p 2222 /root/script/start-hot-emulator.sh &
