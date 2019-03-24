@@ -71,10 +71,8 @@ init_ssh(){
   ssh-keygen -t rsa -N "" -f my.key
   cp my.key.pub authorized_keys
 
-  # Add public key of ssh server running in container to known hosts for travis
-  # (to avoid ssh login prompt)
-  ssh-keyscan -t rsa 127.0.0.1 >> $HOME/.ssh/known_hosts
-  cat $HOME/.ssh/known_hosts
+  # To avoid ssh login prompt
+  echo 'StrictHostKeyChecking=no' >> ~/.ssh/config
 
   # Run a container
   #docker run -d -p 2222:22 -v $(pwd)/sdk:/opt/android-sdk:ro thyrlian/android-sdk
