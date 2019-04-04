@@ -5,7 +5,7 @@
 # fail on any error
 set -e
 
-show_help() {
+show_usage() {
   printf "usage: $0 [command]
 
 Utility for installing Flutter dependencies on local or CI/CD environment.
@@ -13,16 +13,28 @@ Utility for installing Flutter dependencies on local or CI/CD environment.
 Commands:
     --local
         installs dependencies on local machine.
-        (otherwise assumes running on CI/CD machine)
+	(installs in local directory)
+    --ci
+        installs dependencies on ci machine.
+	(uses ANDROID_HOME and HOME)
 "
+}
+
+usage_fail() { echo "$1";  show_usage; exit 111; }
+
+# check for required pre-defined vars
+check_predefined_vars(){
+  required_vars=(android_tools_id android_home flutter_home docker_image android_abi emulator_api)
+  for name in "${required_vars[@]}"; do 
+    eval var='$'$name
+    [ -z $var ] && { echo "$name not defined"; exit 1; }
+  done
+  return 0
 }
 
 install_dependencies(){
   echo Installing dependencies...
-#  echo android_home=$android_home
-#  echo flutter_home=$flutter_home
-#  echo PATH=$PATH
-
+  check_predefined_vars
   install_android_tools
   install_emulator_image
   install_docker_image
@@ -31,7 +43,7 @@ install_dependencies(){
 
 # installs the android sdk tools in specified directory
 install_android_tools(){
-    android_tools_id=4333796 # android-28
+  echo Installing android tools in $android_home ...
 
     # download android SDK tools
     if isMacOS ; then
@@ -65,12 +77,14 @@ install_android_tools(){
 
 # install emulator system image
 install_emulator_image(){
+  echo Installing emulator image...
   sdkmanager "platform-tools" "platforms;android-$emulator_api" "emulator"
   sdkmanager "system-images;android-$emulator_api;$android_abi" > /dev/null
   sdkmanager --list | head -15
 }
 
 install_flutter(){
+  echo Installing flutter...
   # install pre-compiled flutter
   sdkmanager "platforms;android-28" "build-tools;28.0.3" > /dev/null # required by flutter
   sdkmanager --list | head -15
@@ -86,12 +100,13 @@ install_flutter(){
 }
 
 install_docker_image(){
+  echo Installing docker image...
   docker pull $image_name
   docker images
 }
 
 isMacOS() {
-echo OSTYPE=$OSTYPE
+#echo OSTYPE=$OSTYPE
   #[[ $OSTYPE == "darwin"* ]]
   #[ $OSTYPE =~ "darwin" ]
   [ $OSTYPE == "darwin"* ]
@@ -99,30 +114,24 @@ echo OSTYPE=$OSTYPE
   #if [[ $OSTYPE =~ "darwin" ]]
 }
 
-#if isMacOS; then
-  #echo is mac
-#else
-  #echo is not mac
-#fi
-#exit
-
-. docker-vars.env
+source docker-vars.env
 image_name="$DOCKER_USERNAME/$DOCKER_IMAGE:$DOCKER_TAG"
 
 # if no command passed
 if [ -z $1 ]; then
-  #. ./build-vars-ci.env
-  . ./build-vars-local.env
-  install_dependencies
+  usage_fail "echo 'Error: command required"
 else
   case $1 in
     --local)
-        . ./build-vars-local.env
+        source ./build-vars-local.env
+        install_dependencies
+        ;;
+    --ci)
+        source ./build-vars-ci.env
         install_dependencies
         ;;
     *)
-        echo Unknown command: $1
-        show_help
+        usage_fail "Error: unknown command: $1"
         ;;
   esac
 fi

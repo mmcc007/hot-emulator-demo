@@ -5,7 +5,7 @@
 # fail on any error
 set -e
 
-show_help() {
+show_usage() {
   printf "usage: $0 [command]
 
 Utility for starting emulator container in local or CI/CD environment.
@@ -32,8 +32,29 @@ Commands:
 "
 }
 
+usage_fail() { echo "$@";  show_usage; exit 111; }
+
+# check for required pre-defined vars
+check_predefined_vars(){
+  required_vars=( docker_image android_tools_id flutter_home emulator_api android_abi emu_name emu_options )
+  for name in "${required_vars[@]}"; do 
+    eval var='$'$name
+    [ -z "${var}" ] && { echo "$name not defined"; exit 1; }
+  done
+  return 0
+}
+
+# stop adb (if running)
+stop_adb(){
+  SERVICE="adb"
+  if pgrep "$SERVICE" >/dev/null; then
+    adb kill-server
+  fi
+}
+
 start_container(){
   # in case adb server is running
+  stop_adb
   #adb kill-server
   #ps aux |grep adb
   #sudo killall -v -QUIT adb
@@ -106,7 +127,7 @@ start_emulator(){
   #sudo su -c '. ./build-vars-local.env && adb kill-server'
   #adb devices
 
-  ssh -i ./my.key -T root@127.0.0.1 -p 2222 << 'EOSSH'
+  ssh -i ./my.key -T root@127.0.0.1 -p 2222 << EOSSH
 # start emulator from an existing avd with a default snapshot
 set -x
 #set -e
@@ -114,11 +135,13 @@ set -x
 # fix install of emulator (which was installed from host)
 sdkmanager --update
 
-emu_name='test'
-emu_options="-no-audio -no-window -no-boot-anim -gpu swiftshader"
-#nohup $ANDROID_HOME/emulator/emulator -avd $emu_name $emu_options &
+#emu_name='test'
+#emu_options="-no-audio -no-window -no-boot-anim -gpu swiftshader"
+#emu_options="-no-audio -no-window"
+#emu_options="-no-audio -no-boot-anim -gpu swiftshader"
+#nohup $ANDROID_HOME/emulator/emulator -avd $emu_name $emu_options -no-snapshot-save &
 # redirect stdin, stdout and stderr to avoid hanging on exit of ssh
-/opt/android-sdk/emulator/emulator -avd $emu_name $emu_options > foo.out 2> foo.err < /dev/null &
+/opt/android-sdk/emulator/emulator -avd $emu_name $emu_options -no-snapshot-save > foo.out 2> foo.err < /dev/null &
 #/opt/android-sdk/emulator/emulator -avd $emu_name $emu_options &
 #disown
 
@@ -133,14 +156,14 @@ ls -la ~/.android/avd/test.avd/
 ls -la /opt/android-sdk/system-images/android-22/default/armeabi-v7a/
 
 ANDROID_SDK_ROOT=/opt/android-sdk
-/opt/android-sdk/emulator/emulator -avd $emu_name $emu_options > foo.out 2> foo.err < /dev/null &
+/opt/android-sdk/emulator/emulator -avd $emu_name $emu_options -no-snapshot-save > foo.out 2> foo.err < /dev/null &
 sleep 1
 ps ax | grep emu
 
 cat foo.out
 cat foo.err
 
-#./script/android-wait-for-emulator.sh
+./script/android-wait-for-emulator.sh
 
 EOSSH
 
@@ -179,16 +202,15 @@ create_archive(){
 
 # if no command passed
 if [ -z $1 ]; then
-  echo Error: no command specified
-  show_help
-  exit 1
+  usage_fail Error: no command specified
 fi
 
 # set docker vars
-. ./docker-vars.env
+source ./docker-vars.env
 
 # set build env vars
-. ./build-vars-local.env
+source ./build-vars-local.env
+check_predefined_vars
 
 docker_image_name="$DOCKER_USERNAME/$DOCKER_IMAGE:$DOCKER_TAG"
 
@@ -226,7 +248,6 @@ case $1 in
         ssh -i ./my.key root@127.0.0.1 -p 2222 apt-get install -y vim
         ;;
     *)
-        echo Unknown command: $1
-        show_help
+        usage_fail Unknown command: $1
         ;;
 esac

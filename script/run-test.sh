@@ -9,6 +9,7 @@ show_help() {
   printf "usage: $0 <app-name>
 
 Utility for running a flutter integration test in a docker container in local or CI/CD environment.
+Note: must run in container because 'flutter driver' uses an arbitrary port to access observatory.
 
 where
     <app-name>
