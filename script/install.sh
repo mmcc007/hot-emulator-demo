@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
+set -x
 
 # install flutter dependencies
 
 # fail on any error
 set -e
+# fail on any unset var
+set -u
 
 show_usage() {
   printf "usage: $0 [command]
@@ -11,26 +14,28 @@ show_usage() {
 Utility for installing Flutter dependencies on local or CI/CD environment.
 
 Commands:
-    --local
-        installs dependencies on local machine.
-	(installs in local directory)
-    --ci
-        installs dependencies on ci machine.
-	(uses ANDROID_HOME and HOME)
+    --android-sdk
+        install android sdk
+    --flutter
+	install flutter
+    --docker-image
+	install docker image
+    --docker-hot-emulator
+	install docker hot emulator
 "
 }
 
 usage_fail() { echo "$1";  show_usage; exit 111; }
 
 # check for required pre-defined vars
-check_predefined_vars(){
-  required_vars=(android_tools_id android_home flutter_home docker_image android_abi emulator_api)
-  for name in "${required_vars[@]}"; do 
-    eval var='$'$name
-    [ -z $var ] && { echo "$name not defined"; exit 1; }
-  done
-  return 0
-}
+#check_predefined_vars(){
+#  required_vars=(android_tools_id android_home flutter_home docker_image android_abi emulator_api)
+#  for name in "${required_vars[@]}"; do 
+#    eval var='$'$name
+#    [ -z $var ] && { echo "$name not defined"; exit 1; }
+#  done
+#  return 0
+#}
 
 install_dependencies(){
   echo Installing dependencies...
@@ -91,10 +96,10 @@ install_flutter(){
   FLUTTER_CHANNEL=stable
   FLUTTER_VERSION=1.2.1-${FLUTTER_CHANNEL}
   if isMacOS ; then
-    wget --quiet --output-document=flutter.zip https://storage.googleapis.com/flutter_infra/releases/${FLUTTER_CHANNEL}/macos/flutter_macos_v${FLUTTER_VERSION}.zip && unzip -qq flutter.zip > /dev/null && rm flutter.zip
+    wget --quiet --output-document=flutter.zip https://storage.googleapis.com/flutter_infra/releases/${FLUTTER_CHANNEL}/macos/flutter_macos_v${FLUTTER_VERSION}.zip && unzip -qq flutter.zip -d $hot_emulator_home_host > /dev/null && rm flutter.zip
   else
     #sudo apt-get install -y --no-install-recommends lib32stdc++6 libstdc++6 > /dev/null
-    wget --quiet --output-document=flutter.tar.xz https://storage.googleapis.com/flutter_infra/releases/${FLUTTER_CHANNEL}/linux/flutter_linux_v${FLUTTER_VERSION}.tar.xz && tar xf flutter.tar.xz > /dev/null && rm flutter.tar.xz
+    wget --quiet --output-document=flutter.tar.xz https://storage.googleapis.com/flutter_infra/releases/${FLUTTER_CHANNEL}/linux/flutter_linux_v${FLUTTER_VERSION}.tar.xz && tar xf flutter.tar.xz -C $hot_emulator_home_host > /dev/null && rm flutter.tar.xz
   fi
   #flutter doctor -v
 }
@@ -117,19 +122,31 @@ isMacOS() {
 source docker-vars.env
 image_name="$DOCKER_USERNAME/$DOCKER_IMAGE:$DOCKER_TAG"
 
+source ./build-vars-local.env
+check_predefined_vars
+
 # if no command passed
 if [ -z $1 ]; then
   usage_fail "echo 'Error: command required"
 else
+
+  # check install dir exists
+  [ ! -d $hot_emulator_home_host ] && mkdir -p $hot_emulator_home_host
+
   case $1 in
-    --local)
-        source ./build-vars-local.env
-        install_dependencies
+    --android-sdk)
+  	install_android_tools
+  	#install_emulator_image
         ;;
-    --ci)
-        source ./build-vars-ci.env
-        install_dependencies
+    --flutter)
+  	install_flutter
         ;;
+    --docker-image)
+  	install_docker_image
+        ;;
+#    --docker-hot-emulator)
+#	# install docker hot emulator
+#        ;;
     *)
         usage_fail "Error: unknown command: $1"
         ;;
