@@ -5,3 +5,4 @@ flutter/
 authorized_keys
 my.key
 my.key.pub
+script/scratch*
