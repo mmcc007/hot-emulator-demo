@@ -4,6 +4,9 @@
 
 #set -x
 set +e
+set -e
+
+source ./build-vars-local.env
 
 bootanim=""
 failcounter=0
