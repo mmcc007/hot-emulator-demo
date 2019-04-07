@@ -1,0 +1,27 @@
+#!/bin/bash
+#set -x
+# http://redsymbol.net/articles/unofficial-bash-strict-mode/
+set -euo pipefail
+IFS=$'\n\t'
+
+source build-vars-local.env
+
+# Fetch dev.bootcomplete instead of init.svc.bootanim to allow -no-boot-anim option.
+# Follow what AndroidStudio is using https://android.googlesource.com/platform/tools/adt/idea/+/studio-master-dev/android/src/com/android/tools/idea/avdmanager/EmulatorConnectionListener.java#142
+adb wait-for-device
+boot_completed=`adb -e shell getprop dev.bootcomplete 2>&1 | head -n 1`
+timeout=0
+until [ "${boot_completed:0:1}" = "1" ]; do
+    sleep 1
+    boot_completed=`adb -e shell getprop dev.bootcomplete 2>&1 | head -n 1`
+    echo "Wait for 'shell getprop dev.bootcomplete' ${timeout}/500"
+    let "timeout += 1"
+    if [ $timeout -gt 500 ]; then
+         echo "Failed to start emulator (timeout)"
+         exit 1
+    fi
+done
+
+sleep 5
+
+echo "Emulator is ready"
